@@ -1,10 +1,9 @@
-import openai
 from colorama import init, Fore, Style
 import sqlite3
 import pandas as pd
+import openai  # Importing the OpenAI library
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-
 
 def create_database():
     conn = sqlite3.connect('interactions.db')
@@ -16,6 +15,7 @@ def create_database():
                  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
     conn.commit()
     conn.close()
+
 def get_all_interactions():
     conn = sqlite3.connect('interactions.db')
     c = conn.cursor()
@@ -44,10 +44,10 @@ def view_interactions():
             print(f"Question: {interaction[1]}")
             print(f"Answer: {interaction[2]}")
             print(f"Timestamp: {interaction[3]}")
-            print(Fohire.BLUE + "-" * 40 + Style.RESET_ALL)
+            print(Fore.BLUE + "-" * 40 + Style.RESET_ALL)
 
 def get_api_key():
-    return ""
+    return 'your-api-key-here'  # Replace with your actual OpenAI API key
 
 def get_answer(api_key, question):
     openai.api_key = api_key
@@ -75,7 +75,6 @@ WormGPT V3.0 Ultimate developed and owned by Black Market Ⓡ
 
 Welcome to the WormGPT. The biggest enemy of the well-known ChatGPT, lets talk to me!
     """ + Style.RESET_ALL) 
-
 
 def find_last_question(history):
     for i in range(len(history) - 1, -1, -1):
@@ -125,21 +124,21 @@ def analyze_interactions():
 
     df = pd.DataFrame(interactions, columns=['id', 'question', 'answer', 'timestamp'])
 
-    # تحويل النصوص إلى متجهات من الأعداد الصحيحة باستخدام CountVectorizer
+    # Convert text to vector representation using CountVectorizer
     vectorizer = CountVectorizer()
     X = vectorizer.fit_transform(df['question'] + " " + df['answer'])
 
-    # تنفيذ نموذج LatentDirichletAllocation لتجزئة المتجهات إلى أنماط مخفية
-    num_topics = 5  # عدد الأنماط المخفية التي نرغب في اكتشافها
+    # Use LatentDirichletAllocation for topic modeling
+    num_topics = 5  # Number of topics to extract
     lda_model = LatentDirichletAllocation(n_components=num_topics, random_state=42)
     lda_model.fit(X)
 
-    # عرض الأنماط المكتشفة وأكثر الكلمات تكرارًا في كل نمط
+    # Display discovered topics and the most common words in each topic
     feature_names = vectorizer.get_feature_names_out()
     print(Fore.MAGENTA + "\nDiscovered Patterns:" + Style.RESET_ALL)
     print(Fore.BLUE + "-" * 40 + Style.RESET_ALL)
     for topic_idx, topic in enumerate(lda_model.components_):
-        top_words_idx = topic.argsort()[-10:]  # اختيار أفضل 10 كلمات
+        top_words_idx = topic.argsort()[-10:]  # Get the top 10 words for each topic
         top_words = [feature_names[i] for i in top_words_idx]
         print(f"Pattern {topic_idx + 1}: {', '.join(top_words)}")
     print(Fore.BLUE + "-" * 40 + Style.RESET_ALL)
